@@ -80,4 +80,4 @@ npm run test:browser # 설치된 Chrome으로 오프라인 E2E (HTTP 서버 실�
 
 링크로 응시해도 답안이 자동으로 수집되지는 않습니다. 답안 JSON을 내려받아 직접 전달하고, 개인별 결과는 HTML 파일로 공유합니다. 로그인·링크 접근제한은 없으며 문항·평가기준·소스가 공개됩니다. 실제 답안과 채점 결과를 저장소에 올리지 마세요.
 
-`feat/static-assessment`의 `site/` 또는 Pages 워크플로가 변경되면 배포가 실행됩니다. `Actions → Publish GitHub Pages → Run workflow`로 수동 배포할 수도 있습니다. 저장소 변수 `PAGES_ENABLED=true`가 필요하며, 배포 대상은 `site/`뿐입니다. `offline/`, 테스트, 실제 답안·평가 파일은 Pages 배포 대상이 아닙니다.
+`feat/static-assessment`의 `site/` 또는 Pages 워크플로가 변경되면 배포가 실행됩니다. `Actions → Publish GitHub Pages → Run workflow`로 수동 배포할 수도 있습니다. 저장소 변수 `PAGES_ENABLED=true`가 필요하며, 배포 대상은 `site/`의 응시·운영자 화면과 필요한 정적 모듈입니다. `offline/`, 테스트, 실제 답안·평가 파일은 Pages 배포 대상이 아닙니다. 응시 화면에는 운영자용 링크를 노출하지 않습니다.
