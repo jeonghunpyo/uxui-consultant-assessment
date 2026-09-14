@@ -74,7 +74,7 @@ npm run test:browser # 설치된 Chrome으로 오프라인 E2E (HTTP 서버 실�
 
 ## GitHub Pages (선택)
 
-현재 요구사항은 **비공개 저장소 유지**입니다. 지원되는 GitHub 요금제인지 확인한 뒤에만 Pages를 켭니다. 지원되지 않는 경우 저장소를 공개로 바꾸지 않고 오프라인 HTML을 사용합니다.
+현재 요구사항은 **비공개 저장소 유지**입니다. 2026-09-14 확인 결과, GitHub Pages 생성 API가 `Your current plan does not support GitHub Pages for this repository.` (HTTP 422)를 반환했습니다. 저장소를 공개로 바꾸지 않았고 Pages도 배포하지 않았습니다. 현재는 오프라인 HTML을 사용합니다. 향후 지원되는 요금제로 변경한 경우에만 아래 절차를 진행하세요.
 
 Pages를 이용할 수 있고 사이트를 공개하기로 결정했다면:
 
