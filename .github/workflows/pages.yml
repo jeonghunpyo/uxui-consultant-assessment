@@ -1,5 +1,10 @@
 name: Publish GitHub Pages
 on:
+  push:
+    branches: [feat/static-assessment]
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
   contents: read

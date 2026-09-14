@@ -72,14 +72,14 @@ npm run test:browser # 설치된 Chrome으로 오프라인 E2E (HTTP 서버 실�
 
 `site/`가 원본입니다. 소스를 수정한 뒤 `npm run build`를 실행하여 `offline/`도 갱신합니다. 최소 빌더는 이 프로젝트의 named import/export만 지원하며, 다른 모듈 문법은 명시적으로 실패합니다. `offline/시험지.html`에는 채점 루브릭 모듈을 포함하지 않습니다.
 
-## GitHub Pages (선택)
+## GitHub Pages
 
-현재 요구사항은 **비공개 저장소 유지**입니다. 2026-09-14 확인 결과, GitHub Pages 생성 API가 `Your current plan does not support GitHub Pages for this repository.` (HTTP 422)를 반환했습니다. 저장소를 공개로 바꾸지 않았고 Pages도 배포하지 않았습니다. 현재는 오프라인 HTML을 사용합니다. 향후 지원되는 요금제로 변경한 경우에만 아래 절차를 진행하세요.
+2026-09-14 사용자의 명시적 승인에 따라 저장소를 **공개로 전환**하고, 무료 GitHub Pages 기본 주소를 사용하도록 설정했습니다. 기존 비공개 저장소는 현재 요금제에서 Pages를 지원하지 않아 공개 전환을 선택했습니다. Vercel·유료 도메인·별도 DB는 사용하지 않습니다.
 
-Pages를 이용할 수 있고 사이트를 공개하기로 결정했다면:
+- [매니저에게 전달할 시험지](https://jeonghunpyo.github.io/uxui-consultant-assessment/)
+- [사용자용 채점 작업실](https://jeonghunpyo.github.io/uxui-consultant-assessment/grading.html)
+- [결과 JSON 확인](https://jeonghunpyo.github.io/uxui-consultant-assessment/results.html)
 
-1. 저장소 `Settings → Pages → Source`를 `GitHub Actions`로 설정합니다.
-2. `Settings → Secrets and variables → Actions → Variables`에 `PAGES_ENABLED=true`를 추가합니다.
-3. `Actions → Publish GitHub Pages → Run workflow`를 실행합니다.
+링크로 응시해도 답안이 자동으로 수집되지는 않습니다. 답안 JSON을 내려받아 직접 전달하고, 개인별 결과는 HTML 파일로 공유합니다. 로그인·링크 접근제한은 없으며 문항·평가기준·소스가 공개됩니다. 실제 답안과 채점 결과를 저장소에 올리지 마세요.
 
-배포에는 `site/`만 포함합니다. `offline/`, 테스트, 실제 답안·평가 파일은 Pages 배포 대상이 아닙니다. Vercel 관련 코드·설정·서비스는 없습니다.
+`feat/static-assessment`의 `site/` 또는 Pages 워크플로가 변경되면 배포가 실행됩니다. `Actions → Publish GitHub Pages → Run workflow`로 수동 배포할 수도 있습니다. 저장소 변수 `PAGES_ENABLED=true`가 필요하며, 배포 대상은 `site/`뿐입니다. `offline/`, 테스트, 실제 답안·평가 파일은 Pages 배포 대상이 아닙니다.
