@@ -6,6 +6,7 @@ node_modules/
 private/
 downloads/
 test-output/
+pages-public/
 *.pdf
 UXUI_*.json
 UXUI_*.txt

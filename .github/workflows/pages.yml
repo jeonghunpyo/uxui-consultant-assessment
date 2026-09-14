@@ -23,9 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Prepare public reflection page
+        run: npm run build:pages
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: pages-public
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4

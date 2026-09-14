@@ -223,12 +223,12 @@ function buildQuestions() {
 
 function buildActionPanel() {
   const panel = element('section', { className: 'panel action-panel' });
-  const heading = element('h2', { text: '파일로 준비하기' });
-  const lead = element('p', { text: '채점을 위해 JSON 파일을 반드시 담당자에게 전달해 주세요. TXT는 답안을 읽기 편한 형식으로 보관하거나 공유할 때 사용할 수 있습니다.' });
-  const warning = element('p', { className: 'notice warning inline-notice', text: '다운로드만으로 담당자에게 자동 전달되지는 않습니다. 채점용 JSON 파일을 내려받아 직접 전달해 주세요.' });
-  const resumeHelp = element('p', { className: 'field-help', text: '이 화면에서는 내려받은 JSON 파일을 다시 불러와 이어 쓰는 기능을 제공하지 않습니다. 같은 브라우저의 임시저장 내용이 남아 있을 때만 이어서 작성할 수 있습니다.' });
+  const heading = element('h2', { text: '생각 정리본 내려받기' });
+  const lead = element('p', { text: '정리한 내용을 파일로 내려받아 스쿼드에서 함께 이야기 나눌 때 활용해 주세요. JSON은 원문 보관용, TXT는 읽기 편한 형식입니다.' });
+  const warning = element('p', { className: 'notice warning inline-notice', text: '파일은 자동으로 전달되지 않습니다. 내려받은 파일을 스쿼드 논의 전에 준비해 주세요.' });
+  const resumeHelp = element('p', { className: 'field-help', text: '이 화면에서는 내려받은 파일을 다시 불러와 이어 쓰지 않습니다. 같은 브라우저의 임시저장 내용이 남아 있을 때만 이어서 작성할 수 있습니다.' });
   const actionRow = element('div', { className: 'actions' });
-  const jsonButton = element('button', { className: 'button', type: 'button', text: 'JSON 내려받기 (채점용)' });
+  const jsonButton = element('button', { className: 'button', type: 'button', text: 'JSON 내려받기' });
   const textButton = element('button', { className: 'button secondary', type: 'button', text: 'TXT 내려받기 (읽기용)' });
   const resetButton = element('button', { className: 'button danger', type: 'button', text: '이 브라우저 초안 초기화' });
   jsonButton.addEventListener('click', () => download('json'));

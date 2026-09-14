@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="UXUI 컨설턴트 내부교육용 상담 진단 답안 작성 페이지">
-  <title>UXUI 상담 진단</title>
+  <title>UXUI 상담 생각 정리하기</title>
   <style>
 :root {
   --ground: #f5f5f4;
@@ -217,23 +217,23 @@ dd, .sidebar h2 { margin-inline-start: 0; overflow-wrap: anywhere; }
       <a class="brand" href="#" aria-label="UXUI 상담 진단 처음으로">
         <span>UXUI</span><span class="brand-divider">/</span><small>CONSULTANT FIELD NOTES</small>
       </a>
-      <span class="muted">오프라인 시험지 · 파일로 전달</span>
+      <span class="muted">생각 정리하기</span>
     </header>
 
     <main>
       <header class="page-header">
-        <p class="eyebrow">INTERNAL LEARNING · WRITTEN ASSESSMENT</p>
-        <h1>UXUI 상담 진단</h1>
-        <p class="muted intro-copy">지원자의 기대를 확인하고, 직무와 과정을 정확하게 안내하는 상담을 연습합니다.</p>
+        <p class="eyebrow">INTERNAL LEARNING · REFLECTION NOTES</p>
+        <h1>UXUI 상담 생각 정리하기</h1>
+        <p class="muted intro-copy">지원자의 기대를 확인하고, 직무와 과정을 정확하게 안내하기 위한 생각을 정리해 봅니다.</p>
       </header>
 
       <section class="notice" aria-labelledby="assessment-notice-title">
         <div>
           <p class="eyebrow" id="assessment-notice-title">BEFORE YOU START</p>
-          <p><strong>약 20분</strong>이 걸립니다. 이 진단은 상대순위나 인사평가를 위한 것이 아니라 내부교육을 위한 자료입니다.</p>
+          <p><strong>약 20분</strong> 정도 생각을 정리해 봅니다. 정답이나 순위를 확인하는 과정이 아니라, 상담에서 설명할 내용을 돌아보고 서로의 생각을 맞춰보기 위한 자료입니다.</p>
         </div>
         <div>
-          <p><strong>답안은 서버로 제출되지 않습니다.</strong> 작성 후 파일을 내려받아 담당자에게 직접 전달해 주세요.</p>
+          <p><strong>작성 내용은 서버로 제출되지 않습니다.</strong> 정리한 내용을 파일로 내려받아 스쿼드에서 함께 이야기 나눌 때 활용해 주세요.</p>
           <p class="muted">작성 내용은 이 브라우저에만 임시저장됩니다. 공용 PC에서는 작성 후 반드시 초기화해 주세요.</p>
         </div>
       </section>
@@ -242,8 +242,8 @@ dd, .sidebar h2 { margin-inline-start: 0; overflow-wrap: anywhere; }
     </main>
 
     <footer class="footer">
-      <p>UXUI 상담 진단 · 내부교육용</p>
-      <p>채점용 JSON 파일을 담당자에게 전달해 주세요.</p>
+      <p>UXUI 상담 생각 정리하기 · 내부 얼라인용</p>
+      <p>작성 후 스쿼드에서 함께 이야기 나눠 주세요.</p>
     </footer>
   </div>
   <script>
@@ -663,12 +663,12 @@ function buildQuestions() {
 
 function buildActionPanel() {
   const panel = element('section', { className: 'panel action-panel' });
-  const heading = element('h2', { text: '파일로 준비하기' });
-  const lead = element('p', { text: '채점을 위해 JSON 파일을 반드시 담당자에게 전달해 주세요. TXT는 답안을 읽기 편한 형식으로 보관하거나 공유할 때 사용할 수 있습니다.' });
-  const warning = element('p', { className: 'notice warning inline-notice', text: '다운로드만으로 담당자에게 자동 전달되지는 않습니다. 채점용 JSON 파일을 내려받아 직접 전달해 주세요.' });
-  const resumeHelp = element('p', { className: 'field-help', text: '이 화면에서는 내려받은 JSON 파일을 다시 불러와 이어 쓰는 기능을 제공하지 않습니다. 같은 브라우저의 임시저장 내용이 남아 있을 때만 이어서 작성할 수 있습니다.' });
+  const heading = element('h2', { text: '생각 정리본 내려받기' });
+  const lead = element('p', { text: '정리한 내용을 파일로 내려받아 스쿼드에서 함께 이야기 나눌 때 활용해 주세요. JSON은 원문 보관용, TXT는 읽기 편한 형식입니다.' });
+  const warning = element('p', { className: 'notice warning inline-notice', text: '파일은 자동으로 전달되지 않습니다. 내려받은 파일을 스쿼드 논의 전에 준비해 주세요.' });
+  const resumeHelp = element('p', { className: 'field-help', text: '이 화면에서는 내려받은 파일을 다시 불러와 이어 쓰지 않습니다. 같은 브라우저의 임시저장 내용이 남아 있을 때만 이어서 작성할 수 있습니다.' });
   const actionRow = element('div', { className: 'actions' });
-  const jsonButton = element('button', { className: 'button', type: 'button', text: 'JSON 내려받기 (채점용)' });
+  const jsonButton = element('button', { className: 'button', type: 'button', text: 'JSON 내려받기' });
   const textButton = element('button', { className: 'button secondary', type: 'button', text: 'TXT 내려받기 (읽기용)' });
   const resetButton = element('button', { className: 'button danger', type: 'button', text: '이 브라우저 초안 초기화' });
   jsonButton.addEventListener('click', () => download('json'));
