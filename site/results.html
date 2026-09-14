@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UXUI 진단 결과</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .answer-text, .feedback, .summary-copy { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .result-question { break-inside: avoid; } .hidden { display:none !important; }
+    .print-actions { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+    @media print { .topbar, .page-header, .file-panel, .print-actions, .footer { display:none !important; } body { background:#fff; } .shell { max-width:none; } .panel, .question-card { box-shadow:none; border:1px solid #bbb; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="./grading.html">UXUI 컨설턴트 진단</a>
+      <nav class="nav" aria-label="주 메뉴">
+        <a href="./grading.html">채점</a>
+        <a aria-current="page" href="./results.html">결과 보기</a>
+      </nav>
+    </header>
+
+    <main>
+      <header class="page-header">
+        <p class="eyebrow">LOCAL RESULT VIEWER</p>
+        <h1>결과 파일 보기</h1>
+        <p class="muted">결과 JSON 파일을 이 브라우저에서만 열어 봅니다. 업로드나 전송은 하지 않습니다.</p>
+      </header>
+      <section class="panel file-panel" aria-labelledby="open-result-title">
+        <h2 id="open-result-title">결과 JSON 파일 열기</h2>
+        <p class="muted">최종 결과로 내보낸 JSON만 열 수 있습니다. 제출 파일 또는 채점 초안 파일은 이 화면에서 열 수 없습니다.</p>
+        <label class="button" for="result-file">파일 열기</label>
+        <input class="sr-only" id="result-file" type="file" accept="application/json,.json">
+        <p id="file-status" class="status" role="status">아직 결과 파일을 열지 않았습니다.</p>
+      </section>
+
+      <section id="result-content" class="hidden" aria-live="polite">
+        <section class="panel">
+          <div class="print-actions">
+            <div>
+              <p class="eyebrow">ASSESSMENT RESULT</p>
+              <h2 id="manager-name">—</h2>
+              <p id="result-meta" class="muted">—</p>
+            </div>
+            <button id="print-result" class="button secondary" type="button" disabled>인쇄하기</button>
+          </div>
+          <p id="total-score" class="status">0 / 10점</p>
+          <p class="muted">총 10점은 기록용 텍스트이며, 점수 순위나 합격 판정은 제공하지 않습니다.</p>
+        </section>
+
+        <section id="question-results" aria-label="문항별 결과"></section>
+        <section class="panel">
+          <h2>종합 피드백</h2>
+          <div class="field"><h3 class="field-label">강점</h3><p id="strengths" class="summary-copy">—</p></div>
+          <div class="field"><h3 class="field-label">보완할 점</h3><p id="improvements" class="summary-copy">—</p></div>
+          <div class="field"><h3 class="field-label">다음 실습</h3><p id="next-action" class="summary-copy">—</p></div>
+          <p id="reviewer-name" class="muted"></p>
+        </section>
+        <footer class="footer">이 화면은 결과 파일을 읽어 표시할 뿐, 내용을 저장하거나 공개하지 않습니다.</footer>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./results.js"></script>
+</body>
+</html>

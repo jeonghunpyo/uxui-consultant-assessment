@@ -1,0 +1,14 @@
+{
+  "name": "uxui-consultant-assessment",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "브라우저 안에서 작성·파일 전달·채점하는 UXUI 컨설턴트 직무 진단",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node --check site/lib.js && node --check site/exam.js && node --check site/grading.js && node --check site/results.js",
+    "build": "node scripts/build-offline.mjs",
+    "test:browser": "node scripts/test-browser.mjs"
+  },
+  "engines": { "node": ">=22" }
+}

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UXUI 진단 채점</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .grading-layout { align-items: start; } .sticky-side { position: sticky; top: 1rem; }
+    .question-copy, .answer-text, .rubric-text, .result-copy { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .rubric-list { margin: .75rem 0 0; padding-left: 1.25rem; } .rubric-list li { margin: .55rem 0; }
+    .score-option { display: inline-flex; gap: .35rem; align-items: center; margin-right: .9rem; }
+    .file-actions { display:flex; gap:.5rem; flex-wrap:wrap; } .hidden { display:none !important; }
+    .question-card header { display:flex; justify-content:space-between; gap:.75rem; align-items:baseline; }
+    @media (max-width: 760px) { .sticky-side { position: static; } .grading-layout { display:block; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="./grading.html">UXUI 컨설턴트 진단</a>
+      <nav class="nav" aria-label="주 메뉴">
+        <a aria-current="page" href="./grading.html">채점</a>
+        <a href="./results.html">결과 보기</a>
+      </nav>
+    </header>
+
+    <main>
+      <header class="page-header">
+        <p class="eyebrow">LOCAL GRADING WORKSPACE</p>
+        <h1>제출 파일을 열어 채점합니다</h1>
+        <p class="muted">파일은 이 브라우저에서만 읽습니다. 서버 업로드나 자동 전송은 하지 않습니다.</p>
+      </header>
+
+      <section class="notice warning" aria-label="채점 기준 안내">
+        <strong>안내</strong> 이 평가는 보안 시험이나 표준화 평가는 아닙니다. 평가 기준과 해설은 정적 소스에 포함되어 있어 열람할 수 있습니다.
+      </section>
+
+      <section class="panel" aria-labelledby="open-file-title">
+        <h2 id="open-file-title">제출 파일 열기</h2>
+        <p class="muted">매니저 답안 JSON, 채점 초안 JSON, 또는 결과 JSON 파일 1개를 선택하세요. 파일은 업로드되지 않습니다.</p>
+        <div class="file-actions">
+          <label class="button" for="document-file">파일 열기</label>
+          <input class="sr-only" id="document-file" type="file" accept="application/json,.json">
+          <button id="clear-work" class="button secondary" type="button" disabled>현재 작업 비우기</button>
+        </div>
+        <p id="file-status" class="status" role="status">아직 파일을 열지 않았습니다.</p>
+      </section>
+
+      <section id="restore-choice" class="notice hidden" aria-live="polite">
+        <strong>이 브라우저에 같은 제출의 임시저장이 있습니다.</strong>
+        <p id="restore-copy">가져온 파일을 우선 표시하고 있습니다. 어떤 작업을 사용할지 선택하세요.</p>
+        <div class="actions">
+          <button id="use-imported" class="button secondary" type="button">가져온 파일 사용</button>
+          <button id="restore-local" class="button" type="button">임시저장 복원</button>
+        </div>
+      </section>
+
+      <section id="workspace" class="workspace grading-layout hidden" aria-live="polite">
+        <aside class="sidebar sticky-side">
+          <section class="panel">
+            <p class="eyebrow">SUBMISSION</p>
+            <h2 id="manager-name">—</h2>
+            <dl>
+              <dt>제출 ID</dt><dd id="submission-id">—</dd>
+              <dt>작성 시각</dt><dd id="submission-date">—</dd>
+              <dt>참고 자료</dt><dd id="resource-used">—</dd>
+            </dl>
+            <p id="resource-note" class="muted question-copy"></p>
+          </section>
+          <section class="panel">
+            <h2>점수</h2>
+            <p id="score-total" class="status">0 / 10점</p>
+            <p class="muted">총 10점은 기록용 텍스트이며, 점수 순위나 합격 판정은 제공하지 않습니다.</p>
+          </section>
+          <section class="panel">
+            <h2>내보내기</h2>
+            <p class="muted">파일을 내려받아 직접 전달하세요. 공개 또는 전송이 자동으로 이루어지지 않습니다.</p>
+            <div class="actions">
+              <button id="download-draft" class="button secondary" type="button">채점 초안 JSON</button>
+              <button id="download-result-json" class="button" type="button">결과 JSON</button>
+              <button id="download-result-html" class="button" type="button">결과 HTML</button>
+            </div>
+            <p id="export-status" class="status" role="status"></p>
+          </section>
+        </aside>
+
+        <div class="main-content">
+          <form id="grading-form" novalidate>
+            <section id="questions" aria-label="문항별 채점"></section>
+            <section class="panel">
+              <h2>종합 피드백</h2>
+              <div class="field">
+                <label class="field-label" for="strengths">강점</label>
+                <textarea class="textarea" id="strengths" rows="4" maxlength="4000" placeholder="잘 드러난 이해나 설명 방식을 기록하세요."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label" for="improvements">보완할 점</label>
+                <textarea class="textarea" id="improvements" rows="4" maxlength="4000" placeholder="다음에 보완하면 좋을 점을 구체적으로 기록하세요."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label" for="next-action">다음 실습</label>
+                <textarea class="textarea" id="next-action" rows="4" maxlength="4000" placeholder="다음에 해 볼 실습 또는 연습을 안내하세요."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label" for="reviewer-name">채점자 이름 <span class="muted">(선택)</span></label>
+                <input class="input" id="reviewer-name" type="text" maxlength="80" autocomplete="name">
+              </div>
+            </section>
+          </form>
+          <footer class="footer">임시저장은 이 브라우저의 로컬 저장공간에만 보관됩니다. 내보낸 파일을 별도로 보관하세요.</footer>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./grading.js"></script>
+</body>
+</html>

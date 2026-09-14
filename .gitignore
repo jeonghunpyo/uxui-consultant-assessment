@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+.DS_Store
+.vercel/
+private/
+downloads/
+test-output/
+*.pdf
+UXUI_*.json
+UXUI_*.txt
+UXUI_*.html

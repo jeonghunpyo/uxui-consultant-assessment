@@ -1,0 +1,961 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UXUI 진단 채점</title>
+  <style>
+:root {
+  --ground: #f5f5f4;
+  --paper: #fff;
+  --ink: #191919;
+  --muted: #626262;
+  --border: #dededb;
+  --border-strong: #bfbfba;
+  --accent: #191919;
+  --info: #245d74;
+  --warning: #8a4b0e;
+  --error: #9c2929;
+  --focus: #245d74;
+  --serif: "Noto Serif KR", Georgia, serif;
+  --sans: "Apple SD Gothic Neo", Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+button, input, textarea { font: inherit; }
+a { color: inherit; text-underline-offset: 3px; }
+a:hover { color: var(--info); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.shell { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+.topbar {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: inline-flex; align-items: baseline; gap: 8px; color: var(--ink); font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: .04em; text-decoration: none; white-space: nowrap; }
+.brand small { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .09em; }
+.brand-divider { color: var(--border-strong); }
+.nav { display: flex; align-items: center; gap: 18px; font-size: 13px; }
+.nav a { color: var(--muted); }
+
+.page-header { padding: 62px 0 28px; max-width: 760px; }
+.eyebrow { margin: 0 0 8px; color: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; line-height: 1.4; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { margin-bottom: 12px; font-family: var(--serif); font-size: clamp(32px, 5vw, 49px); font-weight: 500; letter-spacing: -.04em; line-height: 1.2; }
+h2 { margin-bottom: 20px; font-family: var(--serif); font-size: 22px; font-weight: 500; letter-spacing: -.025em; line-height: 1.35; }
+h3 { margin-bottom: 14px; font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: -.025em; line-height: 1.4; }
+.muted { color: var(--muted); }
+.intro-copy { margin-bottom: 0; font-size: 17px; }
+
+.notice {
+  display: grid;
+  grid-template-columns: minmax(190px, .8fr) minmax(0, 2fr);
+  gap: 32px;
+  padding: 22px 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+.notice p:last-child { margin-bottom: 0; }
+.notice.warning { border-color: #d7b585; color: #5c3307; background: #fff9f1; }
+.notice.error { border-color: #d7a2a2; color: #6e1c1c; background: #fff7f7; }
+.inline-notice { display: block; padding: 13px 15px; margin: 20px 0; font-size: 14px; }
+
+.workspace { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 50px; padding: 42px 0 70px; }
+.sidebar { align-self: start; position: sticky; top: 18px; padding-top: 3px; }
+.sidebar-progress { margin: 0 0 17px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.question-list { padding: 0; margin: 0; list-style: none; border-top: 1px solid var(--border); }
+.question-list li { border-bottom: 1px solid var(--border); }
+.question-list a { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 5px 8px; padding: 12px 0; color: var(--ink); font-size: 13px; line-height: 1.4; text-decoration: none; }
+.question-list a:hover { color: var(--info); }
+.question-number, .answer-marker, .char-count, .question-meta { font-family: var(--mono); }
+.question-number { color: var(--muted); font-size: 11px; }
+.answer-marker { grid-column: 2; color: var(--muted); font-size: 10px; }
+.answer-marker.is-answered { color: var(--info); }
+
+.main-content { min-width: 0; }
+.panel { margin-bottom: 26px; padding: 26px 28px; background: var(--paper); border: 1px solid var(--border); }
+.panel > :last-child { margin-bottom: 0; }
+.field { margin-top: 18px; }
+.field-label { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 700; }
+.field-help { margin-bottom: 12px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.input, .textarea, .file-input {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 11px 12px;
+  line-height: 1.55;
+}
+.input { max-width: 430px; }
+.textarea { display: block; min-height: 120px; resize: vertical; }
+.textarea::placeholder, .input::placeholder { color: #858585; }
+.input[aria-invalid="true"], .textarea[aria-invalid="true"] { border-color: var(--error); }
+.field-error { margin: 8px 0 0; color: var(--error); font-size: 13px; font-weight: 700; }
+.field-lower { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-top: 8px; }
+.field-lower .field-error { margin: 0; }
+.char-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.compact-field { margin-top: 22px; }
+
+.resource-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
+.radio-option { display: flex; align-items: flex-start; gap: 8px; color: var(--ink); font-size: 14px; cursor: pointer; }
+.radio-option input { flex: 0 0 auto; width: 17px; height: 17px; margin: 3px 0 0; accent-color: var(--accent); }
+
+.question-section { scroll-margin-top: 20px; }
+.section-title { margin-bottom: 4px; }
+.question-section > .muted { margin-bottom: 22px; }
+.question-card { scroll-margin-top: 20px; padding: 30px 0 34px; border-top: 1px solid var(--border); }
+.question-card:last-child { border-bottom: 1px solid var(--border); }
+.question-card .field { margin-top: 20px; }
+.question-meta { margin-bottom: 8px; color: var(--info); font-size: 11px; font-weight: 700; letter-spacing: .07em; }
+.question-prompt { margin-bottom: 9px; font-size: 16px; line-height: 1.8; }
+
+.action-panel { margin-top: 30px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.button {
+  appearance: none;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.button:hover { background: #373737; }
+.button.secondary { background: var(--paper); color: var(--ink); }
+.button.secondary:hover { background: #f0f0ed; }
+.button.danger { margin-left: auto; border-color: #985454; background: var(--paper); color: #7b2424; }
+.button.danger:hover { background: #fff5f5; }
+.button:disabled, .button[aria-disabled="true"] { border-color: var(--border); background: #e8e8e5; color: #858580; cursor: not-allowed; }
+.status { margin: 17px 0 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+dd, .sidebar h2 { margin-inline-start: 0; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+[hidden] { display: none !important; }
+.status.error { color: var(--error); font-weight: 700; }
+.status.warning { color: var(--warning); font-weight: 700; }
+
+.footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px 0 36px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+.footer p { margin: 0; }
+.footer a { color: var(--muted); }
+
+.empty-state { padding: 42px 20px; border: 1px dashed var(--border-strong); color: var(--muted); text-align: center; }
+.file-input { padding: 9px; }
+.grade-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; padding: 16px 0; border-top: 1px solid var(--border); }
+.score-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.answer-text { padding: 14px; background: #f7f7f5; border-left: 2px solid var(--border-strong); white-space: pre-wrap; }
+.feedback { width: 100%; min-height: 80px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 760px) {
+  .shell { padding: 0 24px; }
+  .page-header { padding-top: 44px; }
+  .notice { grid-template-columns: 1fr; gap: 10px; }
+  .workspace { grid-template-columns: 1fr; gap: 30px; padding-top: 30px; }
+  .sidebar { position: static; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .question-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .question-list li:nth-child(odd) { border-right: 1px solid var(--border); padding-right: 12px; }
+  .question-list li:nth-child(even) { padding-left: 12px; }
+  .resource-options { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 15px; }
+  .shell { padding: 0 20px; }
+  .topbar { align-items: flex-start; flex-direction: column; gap: 9px; padding: 17px 0; }
+  .nav { gap: 14px; }
+  .brand small { font-size: 9px; }
+  .panel { padding: 22px 18px; margin-left: -1px; margin-right: -1px; }
+  h1 { font-size: 34px; }
+  h3 { font-size: 21px; }
+  .question-list { grid-template-columns: 1fr; }
+  .question-list li:nth-child(odd), .question-list li:nth-child(even) { border-right: 0; padding-left: 0; padding-right: 0; }
+  .actions { display: grid; grid-template-columns: 1fr; }
+  .button, .button.danger { width: 100%; margin-left: 0; }
+  .field-lower { flex-direction: column; gap: 6px; }
+  .footer { align-items: flex-start; flex-direction: column; }
+}
+
+@media print {
+  body { background: #fff; font-size: 11pt; }
+  .shell { max-width: none; padding: 0; }
+  .topbar, .sidebar, .nav, .actions, .footer, .action-panel, .notice { display: none; }
+  .page-header { padding: 0 0 18px; }
+  .workspace { display: block; padding: 0; }
+  .panel { padding: 0 0 18px; border: 0; }
+  .question-card { break-inside: avoid; padding: 18px 0; }
+  .textarea { min-height: 0; border: 0; padding: 0; resize: none; }
+  .field-lower { display: none; }
+}
+
+</style>
+  <style>
+    .grading-layout { align-items: start; } .sticky-side { position: sticky; top: 1rem; }
+    .question-copy, .answer-text, .rubric-text, .result-copy { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .rubric-list { margin: .75rem 0 0; padding-left: 1.25rem; } .rubric-list li { margin: .55rem 0; }
+    .score-option { display: inline-flex; gap: .35rem; align-items: center; margin-right: .9rem; }
+    .file-actions { display:flex; gap:.5rem; flex-wrap:wrap; } .hidden { display:none !important; }
+    .question-card header { display:flex; justify-content:space-between; gap:.75rem; align-items:baseline; }
+    @media (max-width: 760px) { .sticky-side { position: static; } .grading-layout { display:block; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="채점작업실.html">UXUI 컨설턴트 진단</a>
+      <nav class="nav" aria-label="주 메뉴">
+        <a aria-current="page" href="채점작업실.html">채점</a>
+        <a href="결과확인.html">결과 보기</a>
+      </nav>
+    </header>
+
+    <main>
+      <header class="page-header">
+        <p class="eyebrow">LOCAL GRADING WORKSPACE</p>
+        <h1>제출 파일을 열어 채점합니다</h1>
+        <p class="muted">파일은 이 브라우저에서만 읽습니다. 서버 업로드나 자동 전송은 하지 않습니다.</p>
+      </header>
+
+      <section class="notice warning" aria-label="채점 기준 안내">
+        <strong>안내</strong> 이 평가는 보안 시험이나 표준화 평가는 아닙니다. 평가 기준과 해설은 정적 소스에 포함되어 있어 열람할 수 있습니다.
+      </section>
+
+      <section class="panel" aria-labelledby="open-file-title">
+        <h2 id="open-file-title">제출 파일 열기</h2>
+        <p class="muted">매니저 답안 JSON, 채점 초안 JSON, 또는 결과 JSON 파일 1개를 선택하세요. 파일은 업로드되지 않습니다.</p>
+        <div class="file-actions">
+          <label class="button" for="document-file">파일 열기</label>
+          <input class="sr-only" id="document-file" type="file" accept="application/json,.json">
+          <button id="clear-work" class="button secondary" type="button" disabled>현재 작업 비우기</button>
+        </div>
+        <p id="file-status" class="status" role="status">아직 파일을 열지 않았습니다.</p>
+      </section>
+
+      <section id="restore-choice" class="notice hidden" aria-live="polite">
+        <strong>이 브라우저에 같은 제출의 임시저장이 있습니다.</strong>
+        <p id="restore-copy">가져온 파일을 우선 표시하고 있습니다. 어떤 작업을 사용할지 선택하세요.</p>
+        <div class="actions">
+          <button id="use-imported" class="button secondary" type="button">가져온 파일 사용</button>
+          <button id="restore-local" class="button" type="button">임시저장 복원</button>
+        </div>
+      </section>
+
+      <section id="workspace" class="workspace grading-layout hidden" aria-live="polite">
+        <aside class="sidebar sticky-side">
+          <section class="panel">
+            <p class="eyebrow">SUBMISSION</p>
+            <h2 id="manager-name">—</h2>
+            <dl>
+              <dt>제출 ID</dt><dd id="submission-id">—</dd>
+              <dt>작성 시각</dt><dd id="submission-date">—</dd>
+              <dt>참고 자료</dt><dd id="resource-used">—</dd>
+            </dl>
+            <p id="resource-note" class="muted question-copy"></p>
+          </section>
+          <section class="panel">
+            <h2>점수</h2>
+            <p id="score-total" class="status">0 / 10점</p>
+            <p class="muted">총 10점은 기록용 텍스트이며, 점수 순위나 합격 판정은 제공하지 않습니다.</p>
+          </section>
+          <section class="panel">
+            <h2>내보내기</h2>
+            <p class="muted">파일을 내려받아 직접 전달하세요. 공개 또는 전송이 자동으로 이루어지지 않습니다.</p>
+            <div class="actions">
+              <button id="download-draft" class="button secondary" type="button">채점 초안 JSON</button>
+              <button id="download-result-json" class="button" type="button">결과 JSON</button>
+              <button id="download-result-html" class="button" type="button">결과 HTML</button>
+            </div>
+            <p id="export-status" class="status" role="status"></p>
+          </section>
+        </aside>
+
+        <div class="main-content">
+          <form id="grading-form" novalidate>
+            <section id="questions" aria-label="문항별 채점"></section>
+            <section class="panel">
+              <h2>종합 피드백</h2>
+              <div class="field">
+                <label class="field-label" for="strengths">강점</label>
+                <textarea class="textarea" id="strengths" rows="4" maxlength="4000" placeholder="잘 드러난 이해나 설명 방식을 기록하세요."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label" for="improvements">보완할 점</label>
+                <textarea class="textarea" id="improvements" rows="4" maxlength="4000" placeholder="다음에 보완하면 좋을 점을 구체적으로 기록하세요."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label" for="next-action">다음 실습</label>
+                <textarea class="textarea" id="next-action" rows="4" maxlength="4000" placeholder="다음에 해 볼 실습 또는 연습을 안내하세요."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label" for="reviewer-name">채점자 이름 <span class="muted">(선택)</span></label>
+                <input class="input" id="reviewer-name" type="text" maxlength="80" autocomplete="name">
+              </div>
+            </section>
+          </form>
+          <footer class="footer">임시저장은 이 브라우저의 로컬 저장공간에만 보관됩니다. 내보낸 파일을 별도로 보관하세요.</footer>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+'use strict';
+const __uxui_module_0 = (() => {
+const ASSESSMENT_VERSION = 'uxui-v1';
+const MAX_ANSWER_LENGTH = 6000;
+const QUESTIONS = [
+  {
+    id: 'q1', area: '직무 설명', title: '프로덕트 디자이너는 어떤 일을 하나요?',
+    prompt: '디자인을 처음 접한 지원자에게 프로덕트 디자이너가 하는 일을 1분 안에 설명한다고 가정해 주세요. 실제 상담에서 말하듯이 작성해 주세요.',
+    followUp: '지원자가 떠올릴 수 있는 구체적인 업무 예시를 한 가지 포함해 주세요.'
+  },
+  {
+    id: 'q2', area: '기대 확인과 상담', title: 'AI 이미지 제작을 기대하는 지원자',
+    prompt: '지원자가 “AI로 광고 이미지나 캐릭터를 만들고 싶어서 지원했어요”라고 말했습니다. 이 지원자와 어떻게 상담하시겠습니까?',
+    followUp: '먼저 물어볼 질문, 과정 안내 멘트, 설명 이후 확인할 질문을 실제 대화 형태로 작성해 주세요.'
+  },
+  {
+    id: 'q3', area: '문제 해결 과정', title: '결제 직전 떠나는 사용자',
+    prompt: '가상의 상황입니다. 쇼핑 앱에서 많은 사용자가 결제 직전에 이탈합니다. 이 문제를 맡은 프로덕트 디자이너는 어떤 순서로 일할까요?',
+    followUp: '무엇을 확인하고, 어떤 작업을 하며, 결과를 어떻게 판단할지 설명해 주세요. 실제 서비스의 데이터가 주어진 상황은 아닙니다.'
+  },
+  {
+    id: 'q4', area: 'AI 활용 이해', title: 'AI가 돕는 일, 사람이 판단할 일',
+    prompt: '프로덕트 디자인 업무에서 AI가 도와줄 수 있는 일 두 가지와, 사람이 직접 판단하거나 검증해야 하는 일 두 가지를 설명해 주세요.',
+    followUp: '도구 이름만 나열하기보다 어떤 업무에 어떻게 활용하는지 작성해 주세요.'
+  },
+  {
+    id: 'q5', area: '과정과 결과물', title: '화면 너머의 포트폴리오',
+    prompt: '지원자가 “수료하면 멋진 앱 화면을 모은 포트폴리오를 만들게 되나요? 개발도 직접 해야 하나요?”라고 물었습니다. 어떻게 안내하시겠습니까?',
+    followUp: '포트폴리오에 담겨야 할 내용과 이 과정에서 다루는 구현 학습의 범위를 설명해 주세요. 확실하지 않은 부분은 확인이 필요하다고 적어도 괜찮습니다.'
+  }
+];
+const QUESTION_IDS = QUESTIONS.map(q => q.id);
+const RESOURCE_LABELS = { none: '자료를 참고하지 않았습니다', reference: '커리큘럼·인터넷 자료를 참고했습니다', ai: 'AI의 도움을 받았습니다', other: '기타' };
+function emptyAnswers() { return Object.fromEntries(QUESTION_IDS.map(id => [id, ''])); }
+function emptyGrade() {
+  return { questions: Object.fromEntries(QUESTION_IDS.map(id => [id, { score: null, feedback: '' }])), strengths: '', improvements: '', nextAction: '', reviewerName: '' };
+}
+
+return { ASSESSMENT_VERSION, MAX_ANSWER_LENGTH, QUESTIONS, QUESTION_IDS, RESOURCE_LABELS, emptyAnswers, emptyGrade };
+})();
+
+const __uxui_module_1 = (() => {
+const { ASSESSMENT_VERSION, MAX_ANSWER_LENGTH, QUESTIONS, QUESTION_IDS, RESOURCE_LABELS } = __uxui_module_0;
+
+const FILE_LIMIT_BYTES = 1024 * 1024;
+const SCHEMA_VERSION = 1;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function object(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} 형식이 올바르지 않습니다.`);
+  return value;
+}
+function text(value, label, max, required = false) {
+  if (typeof value !== 'string' || value.length > max || (required && !value.trim())) {
+    throw new Error(`${label}${required ? '을(를) 입력해 주세요.' : ' 형식을 확인해 주세요.'} (최대 ${max.toLocaleString('ko-KR')}자)`);
+  }
+  return value;
+}
+function date(value, label) {
+  if (typeof value !== 'string' || value.length > 40 || !/^\d{4}-\d{2}-\d{2}T/.test(value) || !Number.isFinite(Date.parse(value))) {
+    throw new Error(`${label} 날짜 형식이 올바르지 않습니다.`);
+  }
+  return new Date(value).toISOString();
+}
+function assertVersion(doc) {
+  if (doc.schemaVersion !== SCHEMA_VERSION) throw new Error('지원하지 않는 파일 형식 버전입니다. 파일을 만든 버전의 사이트에서 열어 주세요.');
+}
+function normalizeAnswers(value) {
+  object(value, '답안');
+  return Object.fromEntries(QUESTION_IDS.map((id, i) => [id, text(value[id], `${i + 1}번 답변`, MAX_ANSWER_LENGTH, true)]));
+}
+function parseSubmission(value) {
+  const doc = object(value, '답안 파일');
+  assertVersion(doc);
+  if (doc.kind !== 'uxui-submission') throw new Error('UXUI 답안 파일이 아닙니다. 응시 화면에서 다운로드한 JSON 파일을 선택해 주세요.');
+  if (doc.assessmentVersion !== ASSESSMENT_VERSION) throw new Error('다른 문항 버전의 답안입니다. 해당 버전의 채점 작업실에서 열어 주세요.');
+  if (typeof doc.id !== 'string' || !UUID_PATTERN.test(doc.id)) throw new Error('답안 식별자가 올바르지 않습니다. 원본 파일을 다시 다운로드해 주세요.');
+  if (!Object.hasOwn(RESOURCE_LABELS, doc.resourcesUsed)) throw new Error('자료 참고 여부를 선택해 주세요.');
+  return {
+    kind: 'uxui-submission', schemaVersion: SCHEMA_VERSION, assessmentVersion: ASSESSMENT_VERSION,
+    id: doc.id, managerName: text(doc.managerName, '이름', 80, true).trim(),
+    assessmentTitle: 'UXUI 상담 진단', questions: QUESTIONS.map(question => ({ ...question })),
+    answers: normalizeAnswers(doc.answers), createdAt: date(doc.createdAt, '답안 작성'),
+    resourcesUsed: doc.resourcesUsed, resourceNote: text(doc.resourceNote ?? '', '자료 참고 메모', 1000),
+  };
+}
+function buildSubmission(input) {
+  object(input, '답안');
+  return parseSubmission({
+    ...input, kind: 'uxui-submission', schemaVersion: SCHEMA_VERSION, assessmentVersion: ASSESSMENT_VERSION,
+    id: input.id ?? globalThis.crypto.randomUUID(), createdAt: new Date().toISOString(),
+    resourceNote: input.resourceNote ?? '',
+  });
+}
+function normalizeGrade(value, final = false) {
+  const grade = object(value, '평가');
+  object(grade.questions, '문항별 평가');
+  const questions = Object.fromEntries(QUESTION_IDS.map((id, i) => {
+    const item = object(grade.questions[id], `${i + 1}번 평가`);
+    const score = item.score;
+    if (!(score === null && !final) && !(Number.isInteger(score) && score >= 0 && score <= 2)) {
+      throw new Error(`${i + 1}번 점수를 0·1·2점 중에서 선택해 주세요.`);
+    }
+    return [id, { score, feedback: text(item.feedback, `${i + 1}번 피드백`, 4000, final) }];
+  }));
+  return {
+    questions,
+    strengths: text(grade.strengths, '강점', 4000, final),
+    improvements: text(grade.improvements, '보완할 점', 4000, final),
+    nextAction: text(grade.nextAction, '다음 실습', 4000, final),
+    reviewerName: text(grade.reviewerName ?? '', '평가자 이름', 80),
+  };
+}
+function buildGradingDraft(submission, grade) {
+  return { kind: 'uxui-grading-draft', schemaVersion: SCHEMA_VERSION, submission: parseSubmission(submission), grade: normalizeGrade(grade), updatedAt: new Date().toISOString() };
+}
+function buildResult(submission, grade) {
+  const now = new Date().toISOString();
+  return { kind: 'uxui-result', schemaVersion: SCHEMA_VERSION, submission: parseSubmission(submission), grade: normalizeGrade(grade, true), updatedAt: now, publishedAt: now };
+}
+function parseDocument(input) {
+  let doc;
+  if (typeof input === 'string') {
+    if (new TextEncoder().encode(input).length > FILE_LIMIT_BYTES) throw new Error('파일이 너무 큽니다. 1MB 이하의 JSON 파일을 선택해 주세요.');
+    try { doc = JSON.parse(input); } catch { throw new Error('JSON 파일을 읽을 수 없습니다. 파일 내용을 수정하지 말고 원본 파일을 선택해 주세요.'); }
+  } else doc = input;
+  object(doc, '파일');
+  assertVersion(doc);
+  if (doc.kind === 'uxui-submission') return parseSubmission(doc);
+  if (doc.kind !== 'uxui-grading-draft' && doc.kind !== 'uxui-result') throw new Error('지원하지 않는 파일입니다. UXUI 답안·채점 초안·결과 JSON만 열 수 있습니다.');
+  const result = {
+    kind: doc.kind, schemaVersion: SCHEMA_VERSION, submission: parseSubmission(doc.submission),
+    grade: normalizeGrade(doc.grade, doc.kind === 'uxui-result'), updatedAt: date(doc.updatedAt, '평가 수정'),
+  };
+  if (doc.kind === 'uxui-result') result.publishedAt = date(doc.publishedAt, '결과 확정');
+  return result;
+}
+async function readDocumentFile(file) {
+  if (!file || file.size > FILE_LIMIT_BYTES) throw new Error('1MB 이하의 JSON 파일을 선택해 주세요.');
+  if (!file.name.toLowerCase().endsWith('.json')) throw new Error('JSON 파일을 선택해 주세요. HTML·TXT 파일은 이 화면에서 불러올 수 없습니다.');
+  return parseDocument(await file.text());
+}
+function storageGet(key) {
+  try { const raw = globalThis.localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
+}
+function storageSet(key, value) {
+  try { globalThis.localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
+}
+function storageRemove(key) {
+  try { globalThis.localStorage.removeItem(key); return true; } catch { return false; }
+}
+function countAnswered(answers) { return QUESTION_IDS.filter(id => typeof answers?.[id] === 'string' && answers[id].trim()).length; }
+function totalScore(grade) { return QUESTION_IDS.reduce((sum, id) => sum + (grade.questions[id].score ?? 0), 0); }
+function formatDate(iso) {
+  if (!iso || !Number.isFinite(Date.parse(iso))) return '—';
+  return new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(iso));
+}
+function safeFilename(value) {
+  return value.normalize('NFC').replace(/[\p{C}<>:"/\\|?*]/gu, '_').replace(/\s+/g, '_').replace(/^\.+|\.+$/g, '').slice(0, 60) || '응시자';
+}
+function submissionFilename(submission, extension = 'json') {
+  const formats = { json: ['답안', 'json'], txt: ['답안', 'txt'], html: ['답안', 'html'], 'grading-draft.json': ['채점초안', 'json'], 'result.json': ['결과', 'json'], 'result.html': ['결과', 'html'] };
+  const [kind, suffix] = Object.hasOwn(formats, extension) ? formats[extension] : formats.json;
+  return `UXUI_${kind}_${safeFilename(submission.managerName)}_${submission.id.slice(0, 8)}.${suffix}`;
+}
+function downloadText(content, filename, mime = 'text/plain;charset=utf-8') {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url; anchor.download = safeDownloadName(filename); anchor.hidden = true;
+  document.body.append(anchor); anchor.click(); anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+function safeDownloadName(filename) { return filename.replace(/[\p{C}<>:"/\\|?*]/gu, '_').slice(0, 160); }
+function downloadJson(doc, filename) { downloadText(JSON.stringify(doc, null, 2), filename, 'application/json;charset=utf-8'); }
+function toAnswersText(submission) {
+  const doc = parseSubmission(submission);
+  return [
+    'UXUI 상담 진단 · 답안', `이름: ${doc.managerName}`, `문항 버전: ${doc.assessmentVersion}`,
+    `답안 ID: ${doc.id}`, `파일 생성: ${formatDate(doc.createdAt)} (한국 시간)`,
+    `자료 참고: ${RESOURCE_LABELS[doc.resourcesUsed]}`, `참고 메모: ${doc.resourceNote || '없음'}`,
+    '', '이 파일은 서버에 제출된 기록이 아닙니다. 채점 담당자에게 JSON 답안 파일을 직접 전달해 주세요.', '',
+    ...QUESTIONS.flatMap((q, i) => [`${i + 1}. ${q.title}`, q.prompt, q.followUp, '', doc.answers[q.id], '', '─'.repeat(32), '']),
+  ].join('\n');
+}
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+function exportResultHtml(input) {
+  const result = parseDocument(input);
+  if (result.kind !== 'uxui-result') throw new Error('확정된 결과만 HTML로 내보낼 수 있습니다.');
+  const { submission: s, grade: g } = result;
+  const e = escapeHtml;
+  const cards = QUESTIONS.map((q, i) => `<section class="question"><div class="question-head"><span class="label">${String(i + 1).padStart(2, '0')} / ${e(q.area)}</span><span class="score">${g.questions[q.id].score} / 2점</span></div><h2>${e(q.title)}</h2><p class="prompt">${e(q.prompt)} ${e(q.followUp)}</p><h3>작성한 답변</h3><div class="answer">${e(s.answers[q.id])}</div><h3>문항별 피드백</h3><div class="feedback">${e(g.questions[q.id].feedback)}</div></section>`).join('\n');
+  return `<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>${e(s.managerName)} · UXUI 상담 진단 결과</title>
+<style>
+:root{color-scheme:light;--paper:#fff;--ground:#f5f5f4;--ink:#191919;--muted:#626262;--line:#dededb}*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.8 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;padding-inline:20px;padding-block:48px}main{max-width:860px;margin:auto}header{padding-block:20px 36px;border-bottom:2px solid var(--ink)}.label{font:12px/1.6 ui-monospace,monospace;letter-spacing:.08em;color:var(--muted)}h1{font-size:clamp(28px,5vw,42px);line-height:1.3;letter-spacing:-.05em;margin:16px 0}h2{font-size:21px;line-height:1.5;margin:12px 0}h3{font-size:14px;margin:24px 0 8px}.meta,.prompt,footer{font-size:14px;color:var(--muted)}.summary{padding-block:24px;border-bottom:1px solid var(--line)}.summary p{white-space:pre-wrap;overflow-wrap:anywhere}.question{padding-block:30px;border-bottom:1px solid var(--line);break-inside:avoid}.question-head{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.score{font:600 15px/1.5 ui-monospace,monospace}.answer,.feedback{white-space:pre-wrap;overflow-wrap:anywhere;padding:20px;background:var(--paper);border:1px solid var(--line)}.feedback{border-color:#aaa}.privacy{font-size:13px;border-left:2px solid var(--ink);padding-left:14px;margin-top:24px}footer{padding-block:32px}.meta{overflow-wrap:anywhere}@media print{body{background:#fff;padding-block:0;font-size:11pt}.answer,.feedback{padding:12px}header{padding-top:0}footer{padding-block:16px}.privacy{font-size:9pt}@page{margin:16mm}}
+</style></head><body><main><header><span class="label">UXUI / CONSULTANT FIELD NOTES</span><h1>${e(s.managerName)}님의<br>상담 진단 결과</h1><p>종합 점수 <strong>${totalScore(g)} / 10점</strong> · 문항별 0–2점</p><p class="meta">${e(formatDate(result.publishedAt))} (한국 시간) · ${e(g.reviewerName.trim() || '평가자 미기재')}<br>문항 버전 ${e(s.assessmentVersion)} · 답안 ${e(s.id)}</p><p class="privacy">개인 답안과 평가가 포함된 파일입니다. 수신자에게만 직접 전달하고 GitHub·공개 게시판에 올리지 마세요. 이 진단은 내부 학습용이며, 표준화된 역량 시험이나 합격·순위 판정이 아닙니다.</p></header>
+<section class="summary"><h2>잘하고 있는 점</h2><p>${e(g.strengths)}</p><h2>보완할 점</h2><p>${e(g.improvements)}</p><h2>다음 상담 전 실습</h2><p>${e(g.nextAction)}</p></section>
+${cards}
+<footer>자료 참고 여부: ${e(RESOURCE_LABELS[s.resourcesUsed])}${s.resourceNote ? `<br>${e(s.resourceNote)}` : ''}<br>브라우저의 인쇄 메뉴에서 PDF로 저장할 수 있습니다. 이 파일은 인터넷 연결 없이 열리며 외부로 데이터를 전송하지 않습니다.<br>수정 가능한 파일 형식이므로 서명된 성적 증명서로 사용하지 마세요.</footer></main></body></html>`;
+}
+
+return { FILE_LIMIT_BYTES, parseSubmission, buildSubmission, buildGradingDraft, buildResult, parseDocument, readDocumentFile, storageGet, storageSet, storageRemove, countAnswered, totalScore, formatDate, safeFilename, submissionFilename, downloadText, downloadJson, toAnswersText, escapeHtml, exportResultHtml };
+})();
+
+const __uxui_module_2 = (() => {
+const RUBRIC_GUIDANCE = '내부 기준의 키워드를 모두 적어야 하는 것은 아닙니다. 자연스러운 동등 표현은 인정하며, 한 요소가 빠졌다는 이유만으로 0점을 주지 않습니다. 핵심 오해·단정은 0점, 핵심은 맞지만 일부가 빠진 경우는 1점으로 판단합니다.';
+
+const RUBRICS = {
+  q1: {
+    title: '직무 설명',
+    source: '과정 소개의 사용자 문제·조사·설계·검증 흐름',
+    criteria: [
+      { score: 2, text: '사용자 문제를 이해하고 비즈니스 목표를 함께 고려해 조사·설계·검증하는 일이라는 핵심을 쉬운 말로 설명한다. 실제 앱·웹의 개선 사례를 하나 이상 들어 연결한다.' },
+      { score: 1, text: '화면을 만드는 일 또는 사용자 경험을 개선하는 일이라고 설명하지만, 사용자 문제·비즈니스·검증 중 핵심 연결이 일부 빠지거나 사례가 추상적이다.' },
+      { score: 0, text: '예쁘게 화면을 그리거나 이미지 제작만 하는 직무로 한정하거나, 사용자 문제 해결과 무관하게 설명한다.' }
+    ]
+  },
+  q2: {
+    title: '기대 확인과 상담',
+    source: 'AI 디자인 과정의 앱·웹 사용 문제 설계 중심 안내',
+    criteria: [
+      { score: 2, text: '먼저 기대와 사용 맥락을 묻고, 과정이 이미지 생성에만 머물지 않고 앱·웹의 사용자 문제를 설계하는 학습임을 안내한다. 자기 말로 이해를 확인하고 관심사를 이어서 묻는다. 초보자를 배제하지 않으며 이미지 도구 활용 가능성도 부정하지 않는다.' },
+      { score: 1, text: '질문과 과정 안내는 있으나 기대 확인·이해 확인·관심 탐색 중 일부가 빠진다. 또는 이미지 제작과 프로덕트 디자인의 관계를 다소 단순하게 설명한다.' },
+      { score: 0, text: '이미지 제작만 약속하거나, 반대로 이미지 도구를 전혀 쓰지 않는다고 단정한다. 초보자에게 부적합하다고 배제하거나 기대를 확인하지 않는다.' }
+    ]
+  },
+  q3: {
+    title: '문제 해결 과정',
+    source: '조사 → 가설 → 흐름·화면 설계 → 테스트·데이터 검증',
+    criteria: [
+      { score: 2, text: '가상의 상황임을 고려해 관찰·인터뷰·유사 사례 등으로 원인을 조사하고, 가설을 세운 뒤 사용자 흐름과 화면을 설계한다. 테스트 또는 지표·데이터로 결과를 검증하고 반복할 수 있음을 설명한다.' },
+      { score: 1, text: '조사·설계·검증 흐름은 언급하지만 순서나 가설·테스트·판단 기준이 일부 빠져 있다. 가상 상황에서 확인 가능한 방법이 충분히 구체적이지 않다.' },
+      { score: 0, text: '원인 확인 없이 화면을 바로 바꾸거나, 예쁜 UI 제작만으로 해결된다고 설명한다. 결과를 확인하거나 검증하는 단계가 없다.' }
+    ]
+  },
+  q4: {
+    title: 'AI 활용 이해',
+    source: 'AI는 리서치·분석·프로토타입을 돕고, 사람은 문제·사실을 검증',
+    criteria: [
+      { score: 2, text: 'AI가 리서치 정리·분석, 아이디어 확장, 프로토타입 제작 등에서 어떻게 도움 되는지 두 가지 이상 구체적으로 설명한다. 동시에 사람의 사용자 문제 정의와 사실·결과 검증 책임을 구분해 두 가지 이상 제시한다.' },
+      { score: 1, text: 'AI가 도울 일과 사람이 판단할 일을 구분하지만 활용 장면이 추상적이거나 한쪽의 예시·검증 설명이 부족하다.' },
+      { score: 0, text: 'AI가 모든 판단을 대신한다고 하거나, 도구 이름만 나열한다. 사람의 문제 정의 또는 사실 검증 책임을 부정한다.' }
+    ]
+  },
+  q5: {
+    title: '과정과 결과물',
+    source: '커리큘럼 확인 사항: 근거 있는 설계·검증 포트폴리오와 AI 구현·배포를 다룸',
+    criteria: [
+      { score: 2, text: '포트폴리오가 화면 모음만이 아니라 문제·조사 근거·설계 과정·검증 결과를 보여줘야 함을 설명한다. 과정에서 AI를 활용한 구현·배포를 다룸을 안내하되, 모든 프로덕트 디자이너에게 개발이 필수이거나 취업 보장과 같은 뜻으로 말하지 않는다.' },
+      { score: 1, text: '포트폴리오의 과정·근거 또는 구현·배포 학습 범위 중 한쪽을 언급하지만 설명이 일부 부족하거나 단정적이다.' },
+      { score: 0, text: '화면만 모으면 된다고 하거나 개발이 반드시 필요하다고 단정한다. 구현·배포 학습을 취업 보장과 동일시한다.' }
+    ]
+  }
+};
+
+function rubricFor(questionId) {
+  return RUBRICS[questionId] || null;
+}
+
+return { RUBRIC_GUIDANCE, RUBRICS, rubricFor };
+})();
+
+const __uxui_module_3 = (() => {
+const { QUESTIONS, RESOURCE_LABELS, emptyGrade } = __uxui_module_0;
+const { readDocumentFile, buildGradingDraft, buildResult, downloadJson, downloadText, exportResultHtml, submissionFilename, storageGet, storageSet, storageRemove, parseDocument, formatDate, totalScore } = __uxui_module_1;
+const { rubricFor, RUBRIC_GUIDANCE } = __uxui_module_2;
+
+const $ = (selector) => document.querySelector(selector);
+const fileInput = $('#document-file');
+const workspace = $('#workspace');
+const questionContainer = $('#questions');
+const fileStatus = $('#file-status');
+const exportStatus = $('#export-status');
+const restoreChoice = $('#restore-choice');
+const clearButton = $('#clear-work');
+
+let submission = null;
+let grade = emptyGrade();
+let importedKind = null;
+let pendingLocalDraft = null;
+let saveTimer = null;
+let hasWork = false;
+let hasUnsavedChanges = false;
+let isOpeningFile = false;
+
+function draftKey(id) {
+  return `uxui-grading-draft:${id}`;
+}
+
+function setStatus(element, message, isError = false) {
+  element.textContent = message;
+  element.classList.toggle('error', isError);
+}
+
+function normalizeGrade(candidate) {
+  const fresh = emptyGrade();
+  if (!candidate || typeof candidate !== 'object') return fresh;
+  QUESTIONS.forEach((question) => {
+    const source = candidate.questions?.[question.id];
+    if (source && typeof source === 'object') {
+      fresh.questions[question.id].score = [0, 1, 2].includes(source.score) ? source.score : null;
+      fresh.questions[question.id].feedback = typeof source.feedback === 'string' ? source.feedback : '';
+    }
+  });
+  ['strengths', 'improvements', 'nextAction', 'reviewerName'].forEach((field) => {
+    fresh[field] = typeof candidate[field] === 'string' ? candidate[field] : '';
+  });
+  return fresh;
+}
+
+function createElement(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function buildQuestionCards() {
+  questionContainer.replaceChildren();
+  QUESTIONS.forEach((question, index) => {
+    const card = createElement('article', 'question-card');
+    card.dataset.questionId = question.id;
+
+    const header = document.createElement('header');
+    const heading = createElement('h2', null, `${index + 1}. ${question.title}`);
+    const meta = createElement('p', 'question-meta', question.area);
+    header.append(heading, meta);
+
+    const prompt = createElement('p', 'question-copy', question.prompt);
+    const followUp = createElement('p', 'muted question-copy', question.followUp);
+    const answerHeading = createElement('h3', 'field-label', '제출 답안');
+    const answer = createElement('div', 'answer-text', submission.answers[question.id] || '답안이 작성되지 않았습니다.');
+
+    const details = document.createElement('details');
+    const summary = createElement('summary', null, '평가기준 보기');
+    details.append(summary);
+    const rubric = rubricFor(question.id);
+    if (rubric) {
+      const source = createElement('p', 'muted', `기준 근거: ${rubric.source}`);
+      const list = createElement('ol', 'rubric-list');
+      rubric.criteria.slice().sort((a, b) => b.score - a.score).forEach((criterion) => {
+        const item = document.createElement('li');
+        const strong = createElement('strong', null, `${criterion.score}점. `);
+        item.append(strong, document.createTextNode(criterion.text));
+        list.append(item);
+      });
+      const guidance = createElement('p', 'muted rubric-text', `판정 안내: ${RUBRIC_GUIDANCE}`);
+      details.append(source, list, guidance);
+    }
+
+    const scoreGroup = createElement('fieldset', 'score-options');
+    const legend = createElement('legend', 'field-label', '점수');
+    scoreGroup.append(legend);
+    [0, 1, 2].forEach((value) => {
+      const label = createElement('label', 'score-option');
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = `score-${question.id}`;
+      radio.value = String(value);
+      radio.checked = grade.questions[question.id].score === value;
+      radio.addEventListener('change', () => {
+        grade.questions[question.id].score = value;
+        updateScore();
+        scheduleSave();
+      });
+      label.append(radio, document.createTextNode(`${value}점`));
+      scoreGroup.append(label);
+    });
+
+    const feedbackField = createElement('div', 'field');
+    const feedbackLabel = createElement('label', 'field-label', '문항 피드백');
+    feedbackLabel.htmlFor = `feedback-${question.id}`;
+    const feedback = document.createElement('textarea');
+    feedback.className = 'textarea feedback';
+    feedback.id = `feedback-${question.id}`;
+    feedback.rows = 4;
+    feedback.maxLength = 4000;
+    feedback.placeholder = '답안에서 잘 드러난 점과 보완할 점을 기록하세요.';
+    feedback.value = grade.questions[question.id].feedback;
+    feedback.addEventListener('input', () => {
+      grade.questions[question.id].feedback = feedback.value;
+      scheduleSave();
+    });
+    feedbackField.append(feedbackLabel, feedback);
+
+    card.append(header, prompt, followUp, answerHeading, answer, details, scoreGroup, feedbackField);
+    questionContainer.append(card);
+  });
+}
+
+function syncSummaryFields() {
+  $('#strengths').value = grade.strengths;
+  $('#improvements').value = grade.improvements;
+  $('#next-action').value = grade.nextAction;
+  $('#reviewer-name').value = grade.reviewerName;
+}
+
+function updateScore() {
+  const gradedCount = QUESTIONS.filter((question) => grade.questions[question.id].score !== null).length;
+  $('#score-total').textContent = `현재 ${totalScore(grade)} / 10점 (${gradedCount}/5문항 채점)`;
+}
+
+function renderWorkspace() {
+  $('#manager-name').textContent = submission.managerName || '이름 없음';
+  $('#submission-id').textContent = submission.id;
+  $('#submission-date').textContent = formatDate(submission.createdAt);
+  $('#resource-used').textContent = RESOURCE_LABELS[submission.resourcesUsed] || '기록 없음';
+  $('#resource-note').textContent = submission.resourceNote || '';
+  buildQuestionCards();
+  syncSummaryFields();
+  updateScore();
+  workspace.classList.remove('hidden');
+  clearButton.disabled = false;
+}
+
+function workFromDocument(documentData) {
+  if (documentData.kind === 'uxui-submission') {
+    return { submission: documentData, grade: emptyGrade(), kind: documentData.kind };
+  }
+  if (documentData.kind === 'uxui-grading-draft' || documentData.kind === 'uxui-result') {
+    return { submission: documentData.submission, grade: normalizeGrade(documentData.grade), kind: documentData.kind };
+  }
+  throw new Error('지원자 제출, 채점 초안, 또는 결과 파일만 열 수 있습니다.');
+}
+
+function useWork(work, sourceMessage) {
+  submission = work.submission;
+  grade = normalizeGrade(work.grade);
+  importedKind = work.kind;
+  hasUnsavedChanges = false;
+  pendingLocalDraft = null;
+  hasWork = true;
+  restoreChoice.classList.add('hidden');
+  renderWorkspace();
+  setStatus(fileStatus, sourceMessage);
+}
+
+function localDraftForCurrentSubmission() {
+  const saved = storageGet(draftKey(submission.id));
+  if (!saved) return null;
+  try {
+    const documentData = parseDocument(saved);
+    if (documentData.kind !== 'uxui-grading-draft' || documentData.submission.id !== submission.id) return null;
+    return documentData;
+  } catch {
+    return null;
+  }
+}
+
+function answersDiffer(first, second) {
+  return QUESTIONS.some((question) => first.answers[question.id] !== second.answers[question.id]);
+}
+
+function showRestoreChoice(savedDraft) {
+  const restoresOlderAnswers = answersDiffer(submission, savedDraft.submission);
+  pendingLocalDraft = { documentData: savedDraft, restoresOlderAnswers };
+  const savedInfo = `${savedDraft.submission.managerName} · ${formatDate(savedDraft.updatedAt)}에 임시저장`;
+  $('#restore-copy').textContent = restoresOlderAnswers
+    ? `${savedInfo}된 작업입니다. 가져온 파일과 답안 내용이 다릅니다. 복원하면 이전 답안까지 복원됩니다.`
+    : `${savedInfo}된 작업입니다. 가져온 파일을 우선 표시하고 있습니다. 사용할 작업을 선택하세요.`;
+  restoreChoice.classList.remove('hidden');
+}
+
+function clearScheduledSave() {
+  if (saveTimer !== null) window.clearTimeout(saveTimer);
+  saveTimer = null;
+}
+
+function saveCurrentDraft() {
+  if (!submission) return true;
+  try {
+    const draft = buildGradingDraft(submission, grade);
+    if (!storageSet(draftKey(submission.id), draft)) throw new Error('저장 공간을 사용할 수 없습니다.');
+    hasUnsavedChanges = false;
+    setStatus(exportStatus, '이 브라우저에 임시저장했습니다. 파일도 별도로 내보내 보관하세요.');
+    return true;
+  } catch (error) {
+    setStatus(exportStatus, `임시저장에 실패했습니다. ${error instanceof Error ? error.message : ''}`.trim(), true);
+    return false;
+  }
+}
+
+function flushPendingSave() {
+  if (saveTimer === null && !hasUnsavedChanges) return true;
+  clearScheduledSave();
+  return saveCurrentDraft();
+}
+
+async function openFile(file) {
+  if (!file || isOpeningFile) return;
+  if (hasWork && !window.confirm('현재 채점 작업이 있습니다. 새 파일을 열면 화면의 작업이 바뀝니다. 계속할까요?')) {
+    fileInput.value = '';
+    return;
+  }
+  if (!flushPendingSave() && !window.confirm('현재 작업의 임시저장에 실패했습니다. 내보낸 파일이 없다면 작업이 사라질 수 있습니다. 그래도 새 파일을 열까요?')) {
+    fileInput.value = '';
+    return;
+  }
+  clearScheduledSave();
+  isOpeningFile = true;
+  fileInput.disabled = true;
+  try {
+    setStatus(fileStatus, '파일을 읽는 중입니다.');
+    const documentData = await readDocumentFile(file);
+    const work = workFromDocument(documentData);
+    useWork(work, `${file.name} 파일을 이 브라우저에서 열었습니다. 서버에는 전송되지 않았습니다.`);
+    const savedDraft = localDraftForCurrentSubmission();
+    if (savedDraft) showRestoreChoice(savedDraft);
+  } catch (error) {
+    setStatus(fileStatus, error instanceof Error ? error.message : '파일을 열지 못했습니다.', true);
+  } finally {
+    fileInput.value = '';
+    fileInput.disabled = false;
+    isOpeningFile = false;
+  }
+}
+
+function scheduleSave() {
+  if (!submission) return;
+  hasWork = true;
+  hasUnsavedChanges = true;
+  clearScheduledSave();
+  setStatus(exportStatus, '이 브라우저에 임시저장할 준비를 하고 있습니다.');
+  saveTimer = window.setTimeout(() => {
+    saveTimer = null;
+    saveCurrentDraft();
+  }, 600);
+}
+
+function bindSummaryFields() {
+  const bindings = [
+    ['#strengths', 'strengths'],
+    ['#improvements', 'improvements'],
+    ['#next-action', 'nextAction'],
+    ['#reviewer-name', 'reviewerName']
+  ];
+  bindings.forEach(([selector, field]) => {
+    $(selector).addEventListener('input', (event) => {
+      grade[field] = event.target.value;
+      scheduleSave();
+    });
+  });
+}
+
+function downloadDraft() {
+  if (!submission) return;
+  try {
+    const draft = buildGradingDraft(submission, grade);
+    downloadJson(draft, submissionFilename(submission, 'grading-draft.json'));
+    setStatus(exportStatus, '채점 초안 JSON을 파일로 내려받았습니다. 자동 전송되지는 않습니다.');
+  } catch (error) {
+    setStatus(exportStatus, error instanceof Error ? error.message : '초안을 만들지 못했습니다.', true);
+  }
+}
+
+function buildFinalResult() {
+  if (!submission) throw new Error('먼저 제출 파일을 열어 주세요.');
+  return buildResult(submission, grade);
+}
+
+function downloadResultJson() {
+  try {
+    const result = buildFinalResult();
+    downloadJson(result, submissionFilename(submission, 'result.json'));
+    setStatus(exportStatus, '결과 JSON을 파일로 내려받았습니다. 결과 보기 또는 재채점에 사용할 수 있습니다.');
+  } catch (error) {
+    setStatus(exportStatus, `최종 확정 전 확인이 필요합니다. ${error instanceof Error ? error.message : ''}`.trim(), true);
+  }
+}
+
+function downloadResultHtml() {
+  try {
+    const result = buildFinalResult();
+    downloadText(exportResultHtml(result), submissionFilename(submission, 'result.html'), 'text/html;charset=utf-8');
+    setStatus(exportStatus, '결과 HTML을 파일로 내려받았습니다. 로컬 파일로 열거나 직접 공유할 수 있습니다.');
+  } catch (error) {
+    setStatus(exportStatus, `최종 확정 전 확인이 필요합니다. ${error instanceof Error ? error.message : ''}`.trim(), true);
+  }
+}
+
+fileInput.addEventListener('change', (event) => openFile(event.target.files?.[0]));
+$('#use-imported').addEventListener('click', () => {
+  pendingLocalDraft = null;
+  restoreChoice.classList.add('hidden');
+  setStatus(fileStatus, '가져온 파일의 내용을 사용합니다. 임시저장은 덮어쓰지 않았습니다.');
+});
+$('#restore-local').addEventListener('click', () => {
+  if (!pendingLocalDraft) return;
+  if (pendingLocalDraft.restoresOlderAnswers && !window.confirm('임시저장을 복원하면 가져온 파일의 답안 대신 이전 답안까지 복원됩니다. 계속할까요?')) return;
+  useWork(workFromDocument(pendingLocalDraft.documentData), '이 브라우저에 있던 임시저장을 복원했습니다.');
+  pendingLocalDraft = null;
+});
+clearButton.addEventListener('click', () => {
+  if (!submission || !window.confirm('현재 화면의 작업을 비우고 이 제출의 브라우저 임시저장도 지울까요? 내보낸 파일은 지워지지 않습니다.')) return;
+  clearScheduledSave();
+  const savedId = submission.id;
+  const removed = storageRemove(draftKey(savedId));
+  submission = null;
+  grade = emptyGrade();
+  pendingLocalDraft = null;
+  hasWork = false;
+  hasUnsavedChanges = false;
+  questionContainer.replaceChildren();
+  syncSummaryFields();
+  $('#manager-name').textContent = '—';
+  $('#submission-id').textContent = '—';
+  $('#submission-date').textContent = '—';
+  $('#resource-used').textContent = '—';
+  $('#resource-note').textContent = '';
+  workspace.classList.add('hidden');
+  restoreChoice.classList.add('hidden');
+  clearButton.disabled = true;
+  if (removed) {
+    setStatus(fileStatus, '현재 작업과 이 브라우저의 임시저장을 비웠습니다.');
+    setStatus(exportStatus, '');
+  } else {
+    setStatus(fileStatus, '현재 화면의 작업은 비웠지만, 브라우저 임시저장을 지우지 못했습니다. 브라우저 저장공간 설정을 확인해 주세요.', true);
+    setStatus(exportStatus, '임시저장 삭제에 실패했습니다. 내보낸 파일과 브라우저 저장공간을 확인해 주세요.', true);
+  }
+});
+$('#download-draft').addEventListener('click', downloadDraft);
+$('#download-result-json').addEventListener('click', downloadResultJson);
+$('#download-result-html').addEventListener('click', downloadResultHtml);
+$('#grading-form').addEventListener('submit', event => event.preventDefault());
+window.addEventListener('beforeunload', event => {
+  if (hasUnsavedChanges && !flushPendingSave()) { event.preventDefault(); event.returnValue = ''; }
+});
+window.addEventListener('pagehide', flushPendingSave);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushPendingSave();
+});
+bindSummaryFields();
+
+return {  };
+})();
+</script>
+</body>
+</html>
