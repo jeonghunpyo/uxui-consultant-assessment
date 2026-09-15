@@ -125,6 +125,9 @@ try {
   await ready('#feedback-q1');
   assert.equal(await evaluate(`document.querySelector('#manager-name').textContent`), submission.managerName);
   assert.equal(await evaluate(`document.querySelectorAll('#questions img').length`), 0);
+  assert.equal(await evaluate(`document.querySelectorAll('.model-answer').length`), 5);
+  assert.match(await evaluate(`document.querySelector('.model-answer').textContent`), /문구 일치 여부가 아니라/);
+  assert.match(await evaluate(`document.querySelector('.model-answer .answer-text').textContent`), /프로덕트 디자이너/);
   await evaluate(`document.querySelector('#download-result-html').click()`);
   assert.match(await evaluate(`document.querySelector('#export-status').textContent`), /확인|점수/);
   console.log('PASS: imported answers render safely; incomplete result blocked');
