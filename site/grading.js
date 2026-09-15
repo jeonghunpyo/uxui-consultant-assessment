@@ -82,10 +82,17 @@ function buildQuestionCards() {
     const answerHeading = createElement('h3', 'field-label', '제출 답안');
     const answer = createElement('div', 'answer-text', submission.answers[question.id] || '답안이 작성되지 않았습니다.');
 
+    const rubric = rubricFor(question.id);
+    const modelAnswer = document.createElement('details');
+    modelAnswer.className = 'model-answer';
+    const modelSummary = createElement('summary', null, '참고 답안 보기');
+    const modelLead = createElement('p', 'muted', '문구 일치 여부가 아니라 설명의 방향과 빠진 요소를 비교하는 참고 자료입니다.');
+    const modelText = createElement('div', 'answer-text', rubric?.modelAnswer || '등록된 참고 답안이 없습니다.');
+    modelAnswer.append(modelSummary, modelLead, modelText);
+
     const details = document.createElement('details');
     const summary = createElement('summary', null, '평가기준 보기');
     details.append(summary);
-    const rubric = rubricFor(question.id);
     if (rubric) {
       const source = createElement('p', 'muted', `기준 근거: ${rubric.source}`);
       const list = createElement('ol', 'rubric-list');
@@ -134,7 +141,7 @@ function buildQuestionCards() {
     });
     feedbackField.append(feedbackLabel, feedback);
 
-    card.append(header, prompt, followUp, answerHeading, answer, details, scoreGroup, feedbackField);
+    card.append(header, prompt, followUp, answerHeading, answer, modelAnswer, details, scoreGroup, feedbackField);
     questionContainer.append(card);
   });
 }
